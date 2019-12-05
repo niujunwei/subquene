@@ -1,0 +1,410 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define datatype char
+#define M 50
+#define MAXLEN 50
+
+int num=0,counter1=0,counter2=0;
+
+typedef struct node                                           //定义一个二叉链表结构
+{
+	datatype data;
+	int lt,rt;
+	struct node *lchild,*rchild;
+}BT;
+
+
+BT* createtree()                                                // 1---创 建 树
+{
+	BT *bt;
+	datatype x;
+	scanf("\n%c",&x);
+	if(x=='0')                                                   //指针为空的标志
+	{
+		bt=NULL;                                                 //
+	}
+	else
+	{
+		bt=(BT*)malloc(sizeof(BT));                              //  申请一个新的的结点空间
+		bt->data=x;
+		bt->lchild=createtree();                                 //   创建结点的左子树
+		bt->rchild=createtree();                                 //   创建结点的右子树
+    }
+    return bt;
+}
+
+
+ShowTree(BT *T)                                                      //2--- 显 示 树
+{
+	int i;
+	if(T==NULL)
+	{
+	 	return ;                                                       //当结点为空，
+   	}
+	 else 	                                   
+     {
+     	num++;                                                       //全局变量 num 调控结点的位置
+		printf("\t\t\t");
+     	for(i=0;i<num;i++)
+     	{
+     		printf("  ");
+		}
+	 	printf("%c",T->data);
+	 	for(i=0;i<20-num*2;i++)
+	 	{
+			printf("-");
+		}
+		printf("\n");
+        ShowTree(T->lchild);                                         // 显示结点的左子树
+        ShowTree(T->rchild);                                         // 显示结点的右子树
+        num=num-1;
+	 }
+}
+
+
+void Preorder(BT *T)                                   // 3---先 序 遍 历 树
+{
+	 if(T==NULL)
+	 {
+	 	return;
+	 }
+	 else 	                                    // 本函数调用结束
+     {
+	   printf("%c ",T->data);      		        // 输出结点的数据域
+       Preorder(T->lchild);   	                // 先序递归遍历左子树
+       Preorder(T->rchild);   	                // 先序递归遍历右子树
+     }
+}
+
+
+void Inorder(BT *T)                                   // 4---中 序 遍 历 树
+{
+	if(T==NULL)
+	 {
+	 	return;
+	 }
+	 else 	                                   // 本函数调用结束
+     {
+       Inorder(T->lchild);                   // 中序递归遍历左子树
+	   printf("%c ",T->data);    	         // 输出结点的数据域
+       Inorder(T->rchild);   	             // 中序递归遍历右子树
+     }
+}
+
+
+void Postorder(BT *T)                             // 5---后 序 遍 历 树
+{
+	if(T==NULL)
+	 {
+	 	return;                               // 本函数调用结束
+	 }
+	 else 	                                 
+     {
+       Postorder(T->lchild);   	             // 后序递归遍历左子树
+       Postorder(T->rchild);   	             // 后序递归遍历右子树
+       printf("%c ",T->data);      		     // 输出结点的数据域
+     }
+}
+
+
+void inorderse(BT *bt)                                            //6---中序非递归遍历树
+{
+	
+	int i=0;                            //栈的初始化
+    BT *p,*s[M];                        //保存每个结点的指针的栈
+    p=bt;
+    do
+    {
+		while(p!=NULL)
+        {
+			s[i++]=p;                   //结点的指针入栈
+            p=p->lchild;                //进入左子树
+        }                               //左子树为空，退出
+    	if(i>0)                        //如果栈不空
+		{
+		    p=s[--i];                   //结点的指针出栈
+            printf("%c ",p->data);     //访问出栈的结点
+            p=p->rchild;
+    	}
+    }while(i>0||p!=NULL);               //右子树为空同时栈空，结束循环
+}
+
+
+
+void Levelorder(BT *T)                          // 7----按层次遍历二叉树BT,  T 为指向根结点的指针
+{
+	int i,j;
+    BT *q[MAXLEN],*p;                          // q为指针数组用以模拟队列,每个元素均为指向BT类型的指针, 用来存放结点地址
+    p=T;
+    if (p!=NULL) 		                       // 若二叉树非空，则根结点地址入队
+    {
+		i=1;
+		q[i]=p;
+		j=2;
+    }                                          //  i 指向对头，j 指向对尾
+  	while (i!=j)                               // 当队列不为空时执行循环
+    {
+		p=q[i];
+		printf("%c ",p->data);                       // 访问队首结点的数据域
+        if( p->lchild!=NULL)
+        {
+			q[j]=p->lchild;
+		    j++;
+		}                                      // 将出队结点的左孩子的地址入队
+        if(p->rchild!=NULL)
+        {
+			q[j]=p->rchild;
+			j++;
+		}                                       // 将出队结点的右孩子的地址入队
+    i++;
+    }
+}
+
+
+BT *zxxsh(BT *T)                               //8----中序非递归线索化二叉树
+{
+	
+	BT *p,*pr,*s[M],*t;                         //
+    int i=0;                                    // 计数变量
+    t=(BT*)malloc(sizeof(BT));
+    t->lt=0;                                    //  lt 域为指针域
+    t->rt=1;                                    //  rt 域为线索域
+    t->rchild=t;                                    //  线索后继（右）指向结点本身
+    if(T==NULL)
+	{
+		t->lchild=t;                                //  左子树指向结点本身
+	}
+	else
+    {
+		t->lchild=T;                               // 左子树指向  bt指针  指向的结点
+		pr=t;
+		p=T;                                   //
+		do
+		{
+			while(p!=NULL)
+			{
+				s[i++]=p;                       //  结点指针入栈
+				p=p->lchild;                        //  进入左子树
+			}
+			if(i>0)
+			{
+				p=s[--i];                       //  结点指针出栈
+				printf("%c ",p->data);
+				if(p->lchild==NULL)
+				{
+					p->lt=1;                    //  lt 域为线索域
+					p->lchild=pr;                   //  线索前驱指向 pr指针
+				}
+				if(pr->rchild==NULL)
+				{
+					pr->rt=1;                   //  rt 域为线索域
+					pr->rchild=p;                   //  线索前驱指针指向 p指针
+				}
+				pr=p;
+				p=p->rchild;
+	  		}
+		}while(i>0||p!=NULL);
+	pr->rchild=t;
+	pr->rt=1;
+	t->rchild=pr;
+   }
+	return t;
+}
+
+
+void zxblxss (BT *t)                        //  9----中序遍历找后继线索化二叉树
+{
+	BT *p;
+    p=t->lchild;
+	do
+	{
+		while(p->lt==0)
+		{
+			p=p->lchild; 				          // 最左的结点
+		}
+    	printf("%c ",p->data);                    // 输出最左结点或右子树的左链尾
+        while( (p->rt==1)&&(p->rchild!=t) ) 	  // 为线索且不是中序的尾结点
+        {
+			p=p->rchild;                          // p指向直接后继。
+            printf("%c ",p->data);                // 输出直接后继结点
+        }
+        p=p->rchild;                              // p指向右子树
+   } while( p!=t );
+   
+}
+
+
+
+
+void Nodenum(BT *T)                                       //10-----统计数总结点数
+{
+	if(T==NULL)
+	{
+		return;
+	}
+	else
+	{
+		counter2++;                                      // 全局变量counter2，
+		Nodenum(T->lchild);                              // 递归统计结点左子树结点个数
+		Nodenum(T->rchild);                              // 递归统计结点右子树结点个数
+	}
+}
+
+
+void Leafnum(BT *T)                                      // 11-----叶 子 节 点 数
+{
+	if(T==NULL)                                          // 开始时，T为根结点所在链结点的指针。
+	{
+		return;                                           // 若树为空，什么也不做，返回主调函数。
+	}
+	else
+	{
+		if(T->lchild==NULL&&T->rchild==NULL)
+		{
+			counter1++;                                  // 统计叶子结点个数的全局变量 count（初值为0）加1。
+		}
+		Leafnum(T->lchild);                            // 递归统计 T 的左子树叶子结点数。
+		Leafnum(T->rchild);                            // 递归统计 T 的右子树叶子结点数
+	}
+}
+
+
+
+int TreeDepth(BT *T)                                   //  12----树 深 度
+{
+	int ldep,rdep;                                     //  定义两个变量，存放左、右子树的深度
+	if(T==NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		ldep=TreeDepth(T->lchild);                      // 递归统计左子树深度
+		rdep=TreeDepth(T->rchild);                      // 递归统计右子树深度
+		if(ldep>rdep)
+		{
+			return ldep+1;
+		}
+		else
+		{
+			return rdep+1;
+		}
+	}
+}
+
+
+
+int mask=0;
+
+void Search(BT *T,datatype x)
+{
+	if(T==NULL)
+	{
+		return ;
+	}
+	else
+	{
+		if(T->data==x)
+		{
+			mask=1;
+		}
+		Search(T->lchild,x);
+		Search(T->rchild,x);
+	}
+}
+
+
+void meau()
+{
+	printf("\n\t\t\t  二 叉 树 子 系 统 \n");
+	printf("\t**************************************************************\n");
+	printf("\t*      1------建立二叉树的二叉链表存储结构                   *\n");
+	printf("\t*      2------按凹入表显示二叉树                             *\n");
+	printf("\t*      3------按先序遍历二叉树                               *\n");
+	printf("\t*      4------按中序遍历二叉树                               *\n");
+	printf("\t*      5------按后序遍历二叉树                               *\n");
+	printf("\t*      6------按层次遍历二叉树                               *\n");
+	printf("\t*      7-----统计二叉树的结点总数                           *\n");
+	printf("\t*      8-----统计二叉树的叶子结点总数                       *\n");
+	printf("\t*      9-----统计二叉树的深度                               *\n");
+	printf("\t*      0------返            回                               *\n");
+	printf("\t**************************************************************\n");
+	printf("\t  请选择要执行的操作代号（0--9）: ");
+}
+
+
+void main()
+{
+	int chiose;
+
+	BT *T;
+	while(1)
+	{
+		meau();
+		scanf("%d",&chiose);
+		if(chiose==1)
+		{
+			printf("\n\t  按先序次序输入二叉树中结点的值,以0字符表示空树\n");
+			printf("\t请输入： ");
+			T=createtree();
+			printf("\t  数据输入完毕!\n");
+		}
+		else if(chiose==2)
+		{
+			printf("\n\t\t\t凹入表显示二叉树\n");
+			ShowTree(T);
+		}
+		else if(chiose==3)
+		{
+			printf("\n\t\t先序遍历二叉树: ");
+			Preorder(T);
+			printf("\n");
+		}
+		else if(chiose==4)
+		{
+			printf("\n\t\t中序遍历二叉树: ");
+			Inorder(T);
+			printf("\n");
+		}
+		else if(chiose==5)
+		{
+			printf("\n\t\t后序遍历二叉树: ");
+			Postorder(T);
+			printf("\n");
+		}
+
+		else if(chiose==6)
+		{
+			printf("\n\t\t层次遍历二叉树: ");
+			Levelorder(T);
+			printf("\n");
+		}
+
+		else if(chiose==7)
+		{
+			Nodenum(T);
+			printf("\n\t树的节点数为: %d\n",counter2);
+			counter2=0;
+		}
+		else if(chiose==8)
+		{
+			Leafnum(T);
+			printf("\n\t树的叶子节点数为: %d\n",counter1);
+			counter1=0;
+		}
+		else if(chiose==9)
+		{
+			printf("\n\t树的深度为: %d\n",TreeDepth(T));
+		}
+
+		else if(chiose==0)
+		{
+			break;
+		}
+		else
+		{
+			printf("\n\t\t 输入有误，请重新选择操作代号\n");
+		}
+	}
+}
